@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>taskcalcアプリケーションサポート</title>
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script>
+        (function(){
+            emailjs.init("t.yamazaki11");
+        })();
+    </script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -50,6 +56,11 @@
             text-decoration: none;
             border-radius: 5px;
             margin-top: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #0056b3;
         }
         footer {
             margin-top: 40px;
@@ -58,24 +69,120 @@
             text-align: center;
             color: #666;
         }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        .error {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        #contactForm {
+            display: block;
+        }
+        .required {
+            color: #dc3545;
+            margin-left: 3px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+        }
+        .close {
+            float: right;
+            cursor: pointer;
+            font-size: 24px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>taskcalcアプリケーションサポート</h1>
+        <h1>taskcalc アプリケーションサポート</h1>
 
         <div class="section">
             <h2>お問い合わせ</h2>
             <div class="contact-box">
-                <p>アプリについてご質問やご要望がございましたら、以下の方法でお問い合わせください：</p>
+                <p>アプリについてご質問やご要望がございましたら、以下のフォームからお問い合わせください：</p>
                 <p>📧 メール: t.yamazaki11@gmail.com</p>
-                <p>📱 お問い合わせフォーム: <a href="#" class="button">お問い合わせはこちら</a></p>
-                <p>通常1-2日以内に返信させていただきます。</p>
+                
+                <form id="contactForm" onsubmit="return handleSubmit(event)">
+                    <div class="form-group">
+                        <label for="name">お名前<span class="required">*</span></label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">メールアドレス<span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">お問い合わせ種類<span class="required">*</span></label>
+                        <select id="category" name="category" required>
+                            <option value="">選択してください</option>
+                            <option value="question">アプリの使い方について</option>
+                            <option value="bug">不具合の報告</option>
+                            <option value="feature">機能の要望</option>
+                            <option value="other">その他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">お問い合わせ内容<span class="required">*</span></label>
+                        <textarea id="message" name="message" required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="button">送信する</button>
+                </form>
             </div>
         </div>
 
         <div class="section">
             <h2>よくある質問 (FAQ)</h2>
+            <div class="faq-item">
+                <p class="faq-question">Q: アプリの使い方がわかりません</p>
+                <p>A: アプリ内のチュートリアルをご確認ください。基本的な機能や操作方法を順を追って説明しています。</p>
+            </div>
             <div class="faq-item">
                 <p class="faq-question">Q: アプリが動作しない場合はどうすればよいですか？</p>
                 <p>A: 以下の手順をお試しください：</p>
@@ -87,7 +194,7 @@
             </div>
             <div class="faq-item">
                 <p class="faq-question">Q: データのバックアップは可能ですか？</p>
-                <p>A: 現在データのバックアップはできません。開発中になり、将来実装の予定です。</p>
+                <p>A: はい。アプリ設定画面からデータのバックアップと復元が可能です。</p>
             </div>
         </div>
 
@@ -102,5 +209,77 @@
             <p>© 2024 Yamazaki. All rights reserved.</p>
         </footer>
     </div>
+
+    <!-- 確認モーダル -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>送信完了</h2>
+            <p>お問い合わせありがとうございます。</p>
+            <p>内容を確認次第、ご登録いただいたメールアドレスに返信させていただきます。</p>
+            <p>通常、1-2日以内に返信いたします。</p>
+            <button class="button" onclick="closeModal()">閉じる</button>
+        </div>
+    </div>
+
+    <script>
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            // フォームのバリデーション
+            const form = event.target;
+            const formData = new FormData(form);
+            
+            // 必須項目のチェック
+            let isValid = true;
+            form.querySelectorAll('[required]').forEach(input => {
+                if (!input.value) {
+                    isValid = false;
+                    const errorDiv = input.parentElement.querySelector('.error') || document.createElement('div');
+                    errorDiv.className = 'error';
+                    errorDiv.textContent = '必須項目です';
+                    if (!input.parentElement.querySelector('.error')) {
+                        input.parentElement.appendChild(errorDiv);
+                    }
+                } else {
+                    const errorDiv = input.parentElement.querySelector('.error');
+                    if (errorDiv) {
+                        errorDiv.remove();
+                    }
+                }
+            });
+            
+            if (!isValid) {
+                return false;
+            }
+            
+            // EmailJSを使ってフォームを送信
+            emailjs.sendForm('service_9irzdmo', 'template_zau8x89', form)
+                .then(function(response) {
+                    console.log('SUCCESS!', response.status, response.text);
+                    // モーダルを表示
+                    document.getElementById('confirmationModal').style.display = 'flex';
+                    // フォームをリセット
+                    form.reset();
+                }, function(error) {
+                    console.log('FAILED...', error);
+                    alert('送信に失敗しました。後ほど再度お試しください。');
+                });
+            
+            return false;
+        }
+        
+        function closeModal() {
+            document.getElementById('confirmationModal').style.display = 'none';
+        }
+        
+        // モーダルの外側をクリックしたときにも閉じる
+        window.onclick = function(event) {
+            const modal = document.getElementById('confirmationModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    </script>
 </body>
 </html>
